@@ -1,0 +1,34 @@
+name: Update README cache
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bump-cache:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bump SVG cache version
+        run: |
+          TS=$(date +%s)
+          sed -i -E "s|luna\.svg\?v=[0-9A-Za-z_-]+|luna.svg?v=$TS|g" README.md
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          if git diff --quiet; then
+            echo "No changes"
+          else
+            git add README.md
+            git commit -m "Update README stats cache"
+            git push
+          fi
